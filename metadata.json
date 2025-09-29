@@ -1,0 +1,5 @@
+{
+  "name": "VersaCRM-un2",
+  "description": "A sophisticated, multi-tenant CRM application that dynamically adapts its UI, data fields, and modules to specific industries like Health, Education, or Property Management, managed by a Super Admin.",
+  "requestFramePermissions": []
+}
