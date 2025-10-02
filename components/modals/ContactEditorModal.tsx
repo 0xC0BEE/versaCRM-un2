@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { Contact, ContactStatus, CustomField, CustomFieldType, UploadedFile } from '../../types';
 import { useData } from '../../hooks/useData';
@@ -19,10 +20,12 @@ interface ContactEditorModalProps {
 const ContactEditorModal: React.FC<ContactEditorModalProps> = ({ isOpen, onClose, contact }) => {
   const { currentUser } = useAuth();
   const industryConfig = useIndustryConfig();
-  const { useAddContact, useUpdateContact } = useData();
+  const { useAddContact, useUpdateContact, useTeamMembers } = useData();
   const addContactMutation = useAddContact();
   const updateContactMutation = useUpdateContact();
   const { addNotification } = useNotification();
+
+  const { data: teamMembers } = useTeamMembers(currentUser?.organizationId);
 
   const [formData, setFormData] = useState<Partial<Contact>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -193,6 +196,12 @@ const ContactEditorModal: React.FC<ContactEditorModalProps> = ({ isOpen, onClose
         <Input label="Full Name" name="name" value={formData.name || ''} onChange={handleChange} required className={errors.name ? 'border-danger' : ''} helperText={errors.name}/>
         <Input label="Email Address" name="email" type="email" value={formData.email || ''} onChange={handleChange} required className={errors.email ? 'border-danger' : ''} helperText={errors.email} />
         <Input label="Phone Number" name="phone" value={formData.phone || ''} onChange={handleChange} />
+        <Select label={industryConfig?.fieldLabels.assignedToId || 'Assign To'} name="assignedToId" value={formData.assignedToId || ''} onChange={handleChange}>
+            <option value="">Unassigned</option>
+            {teamMembers?.map(member => (
+                <option key={member.id} value={member.id}>{member.name}</option>
+            ))}
+        </Select>
         <Select label="Status" name="status" value={formData.status || ''} onChange={handleChange}>
             {Object.values(ContactStatus).map(s => <option key={s} value={s}>{s}</option>)}
         </Select>

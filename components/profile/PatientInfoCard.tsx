@@ -1,4 +1,3 @@
-
 // components/profile/PatientInfoCard.tsx
 
 import React from 'react';

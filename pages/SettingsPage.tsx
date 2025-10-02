@@ -1,8 +1,10 @@
-
 import React, { useState } from 'react';
 import Card from '../components/ui/Card';
 import WorkflowsTab from '../components/settings/WorkflowsTab';
 import IntegrationsTab from '../components/settings/IntegrationsTab';
+import LeadScoringTab from '../components/settings/LeadScoringTab';
+import KnowledgeBaseTab from '../components/settings/KnowledgeBaseTab';
+import SLASettingsTab from '../components/settings/SLASettingsTab';
 import Icon from '../components/ui/Icon';
 
 const SettingsPage: React.FC = () => {
@@ -11,6 +13,9 @@ const SettingsPage: React.FC = () => {
     const tabs = [
         { id: 'integrations', label: 'Integrations', icon: 'zap' },
         { id: 'workflows', label: 'Workflows', icon: 'briefcase' },
+        { id: 'leadScoring', label: 'Lead Scoring', icon: 'star' },
+        { id: 'knowledgeBase', label: 'Knowledge Base', icon: 'bookOpen' },
+        { id: 'serviceHub', label: 'Service Hub', icon: 'ticket' },
     ];
 
     return (
@@ -40,6 +45,9 @@ const SettingsPage: React.FC = () => {
                 <div className="md:col-span-3">
                     {activeTab === 'integrations' && <IntegrationsTab />}
                     {activeTab === 'workflows' && <WorkflowsTab />}
+                    {activeTab === 'leadScoring' && <LeadScoringTab />}
+                    {activeTab === 'knowledgeBase' && <KnowledgeBaseTab />}
+                    {activeTab === 'serviceHub' && <SLASettingsTab />}
                 </div>
             </div>
         </div>

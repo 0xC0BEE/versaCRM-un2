@@ -1,4 +1,3 @@
-
 // pages/superadmin/Organizations.tsx
 
 import React, { useState } from 'react';

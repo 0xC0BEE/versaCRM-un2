@@ -1,61 +1,58 @@
 
+// FIX: Create WorkflowEditorModal component to resolve module not found error.
 import React, { useState, useEffect } from 'react';
-import { Workflow, WorkflowTrigger, WorkflowAction, ContactStatus, Organization } from '../../types';
+import { Organization, Workflow, WorkflowTrigger, WorkflowAction, ContactStatus } from '../../types';
 import { useData } from '../../hooks/useData';
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
 import Select from '../ui/Select';
-import { useAuth } from '../../hooks/useAuth';
 
 interface WorkflowEditorModalProps {
   isOpen: boolean;
   onClose: () => void;
+  organization: Organization;
   workflow: Workflow | null;
-  organization?: Organization;
 }
 
-const WorkflowEditorModal: React.FC<WorkflowEditorModalProps> = ({ isOpen, onClose, workflow, organization }) => {
-  const { currentUser } = useAuth();
+const WorkflowEditorModal: React.FC<WorkflowEditorModalProps> = ({ isOpen, onClose, organization, workflow }) => {
   const { useAddWorkflow, useUpdateWorkflow } = useData();
   const addWorkflow = useAddWorkflow();
   const updateWorkflow = useUpdateWorkflow();
-  
+
   const [name, setName] = useState('');
-  const [trigger, setTrigger] = useState<WorkflowTrigger>(WorkflowTrigger.ContactStatusChanges);
-  const [triggerCondition, setTriggerCondition] = useState<{ newStatus: ContactStatus }>({ newStatus: ContactStatus.Active });
+  const [trigger, setTrigger] = useState<WorkflowTrigger>(WorkflowTrigger.NewContactCreated);
   const [action, setAction] = useState<WorkflowAction>(WorkflowAction.CreateTask);
-  const [actionDetails, setActionDetails] = useState<any>({ taskTitle: '', assignTo: 'owner' });
+  const [triggerCondition, setTriggerCondition] = useState<any>({});
+  const [actionDetails, setActionDetails] = useState<any>({});
 
   useEffect(() => {
     if (workflow) {
       setName(workflow.name);
-      setTrigger(workflow.trigger);
-      setTriggerCondition(workflow.triggerCondition || { newStatus: ContactStatus.Active });
-      setAction(workflow.action);
+      setTrigger(workflow.trigger || WorkflowTrigger.NewContactCreated);
+      setAction(workflow.action || WorkflowAction.CreateTask);
+      setTriggerCondition(workflow.triggerCondition || {});
       setActionDetails(workflow.actionDetails || {});
     } else {
       setName('');
-      setTrigger(WorkflowTrigger.ContactStatusChanges);
-      setTriggerCondition({ newStatus: ContactStatus.Active });
+      setTrigger(WorkflowTrigger.NewContactCreated);
       setAction(WorkflowAction.CreateTask);
-      setActionDetails({ taskTitle: 'Follow up with patient', assignTo: 'owner' });
+      setTriggerCondition({});
+      setActionDetails({ taskTitle: 'New task from workflow' });
     }
   }, [workflow, isOpen]);
 
   const handleSubmit = () => {
-    const organizationId = organization?.id || currentUser?.organizationId;
-    if (!organizationId) return;
-
     const data: Omit<Workflow, 'id'> = {
       name,
-      organizationId: organizationId,
+      organizationId: organization.id,
       trigger,
-      triggerCondition,
       action,
-      actionDetails
+      triggerCondition,
+      actionDetails,
+      nodes: [], // for new workflow structure compatibility
+      edges: [],
     };
-    
     if (workflow) {
       updateWorkflow.mutate({ ...workflow, ...data }, { onSuccess: onClose });
     } else {
@@ -72,36 +69,25 @@ const WorkflowEditorModal: React.FC<WorkflowEditorModalProps> = ({ isOpen, onClo
       title={workflow ? 'Edit Workflow' : 'Create Workflow'}
       footer={<>
         <Button variant="secondary" onClick={onClose}>Cancel</Button>
-        <Button onClick={handleSubmit} isLoading={isLoading}>Save Workflow</Button>
+        <Button onClick={handleSubmit} isLoading={isLoading}>Save</Button>
       </>}
     >
       <div className="space-y-4">
         <Input label="Workflow Name" value={name} onChange={e => setName(e.target.value)} />
-
-        <div className="p-4 border rounded-md border-border-default space-y-3">
-          <h4 className="font-semibold">Trigger ("When this happens...")</h4>
-          <Select label="Trigger Event" value={trigger} onChange={e => setTrigger(e.target.value as WorkflowTrigger)}>
-            <option value={WorkflowTrigger.ContactStatusChanges}>Patient Status Changes</option>
-            <option value={WorkflowTrigger.NewContactCreated}>A New Patient is Created</option>
-          </Select>
-          {trigger === WorkflowTrigger.ContactStatusChanges && (
-            <Select label="To Status" value={triggerCondition.newStatus} onChange={e => setTriggerCondition({ newStatus: e.target.value as ContactStatus })}>
-              {Object.values(ContactStatus).map(s => <option key={s} value={s}>{s}</option>)}
+        <Select label="Trigger (When...)" value={trigger} onChange={e => setTrigger(e.target.value as WorkflowTrigger)}>
+          {Object.values(WorkflowTrigger).map(t => <option key={t} value={t}>{t.replace(/([A-Z])/g, ' $1').trim()}</option>)}
+        </Select>
+        {trigger === WorkflowTrigger.ContactStatusChanges && (
+            <Select label="...status changes to" value={triggerCondition.newStatus || ''} onChange={e => setTriggerCondition({ newStatus: e.target.value })}>
+                {Object.values(ContactStatus).map(s => <option key={s} value={s}>{s}</option>)}
             </Select>
-          )}
-        </div>
-
-        <div className="p-4 border rounded-md border-border-default space-y-3">
-          <h4 className="font-semibold">Action ("Do this...")</h4>
-          <Select label="Action" value={action} onChange={e => setAction(e.target.value as WorkflowAction)}>
-            <option value={WorkflowAction.CreateTask}>Create a Task</option>
-            <option value={WorkflowAction.SendEmail} disabled>Send an Email (coming soon)</option>
-          </Select>
-          {action === WorkflowAction.CreateTask && (
-            <Input label="Task Title" value={actionDetails.taskTitle} onChange={e => setActionDetails({ ...actionDetails, taskTitle: e.target.value })} />
-          )}
-        </div>
-
+        )}
+        <Select label="Action (Then...)" value={action} onChange={e => setAction(e.target.value as WorkflowAction)}>
+          {Object.values(WorkflowAction).map(a => <option key={a} value={a}>{a.replace(/([A-Z])/g, ' $1').trim()}</option>)}
+        </Select>
+        {action === WorkflowAction.CreateTask && (
+            <Input label="...create task with title" value={actionDetails.taskTitle || ''} onChange={e => setActionDetails({ taskTitle: e.target.value })} />
+        )}
       </div>
     </Modal>
   );

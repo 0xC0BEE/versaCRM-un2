@@ -91,6 +91,7 @@ const ContactsPage: React.FC = () => {
                             <tr>
                                 <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Name</th>
                                 <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Status</th>
+                                <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Score</th>
                                 <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">{industryConfig.fieldLabels.assignedToId}</th>
                                 <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Last Contacted</th>
                                 <th scope="col" className="px-6 py-3 text-right text-xs font-semibold text-text-secondary uppercase tracking-wider">Actions</th>
@@ -108,6 +109,7 @@ const ContactsPage: React.FC = () => {
                                             {contact.status}
                                         </span>
                                     </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-text-default">{contact.score}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-text-secondary">{getAssigneeName(contact.assignedToId)}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-text-secondary">{new Date(contact.lastContacted).toLocaleDateString()}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">

@@ -11,6 +11,7 @@ interface ConfirmationModalProps {
   message: string;
   confirmText?: string;
   isDestructive?: boolean;
+  isLoading?: boolean;
 }
 
 const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
@@ -21,6 +22,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   message,
   confirmText = 'Confirm',
   isDestructive = false,
+  isLoading = false,
 }) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={title} size="sm">
@@ -38,11 +40,9 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
        <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
         <Button
           variant={isDestructive ? 'danger' : 'primary'}
-          onClick={() => {
-            onConfirm();
-            onClose();
-          }}
+          onClick={onConfirm}
           className="w-full sm:ml-3 sm:w-auto"
+          isLoading={isLoading}
         >
           {confirmText}
         </Button>
@@ -50,6 +50,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
           variant="secondary"
           onClick={onClose}
           className="mt-3 w-full sm:mt-0 sm:w-auto"
+          disabled={isLoading}
         >
           Cancel
         </Button>

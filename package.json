@@ -9,11 +9,21 @@
     "preview": "vite preview"
   },
   "dependencies": {
-
+    "react-router-dom": "^7.9.3",
+    "react-dom": "^19.1.1",
+    "react": "^19.1.1",
+    "@tanstack/react-query": "^5.90.2",
+    "@google/genai": "^1.21.0",
+    "recharts": "^3.2.1",
+    "@heroicons/react": "^2.2.0",
+    "date-fns": "^4.1.0",
+    "lodash.set": "^4.3.2",
+    "react-dnd": "^16.0.1",
+    "react-dnd-html5-backend": "^16.0.1"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
-    
+    "@vitejs/plugin-react": "^5.0.0",
     "typescript": "~5.8.2",
     "vite": "^6.2.0"
   }

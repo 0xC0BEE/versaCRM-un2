@@ -28,6 +28,7 @@ const TasksTab: React.FC<TasksTabProps> = ({ contact, teamMembers }) => {
 
     const [newTaskTitle, setNewTaskTitle] = useState('');
     const [assignedTo, setAssignedTo] = useState(currentUser?.id || '');
+    const [shareNewTask, setShareNewTask] = useState(false);
 
     const handleAddTask = () => {
         if (!newTaskTitle.trim()) return;
@@ -38,13 +39,21 @@ const TasksTab: React.FC<TasksTabProps> = ({ contact, teamMembers }) => {
             assignedTo: assignedTo,
             completed: false,
             dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+            sharedWithClient: shareNewTask,
         }, {
-            onSuccess: () => setNewTaskTitle(''),
+            onSuccess: () => {
+                setNewTaskTitle('');
+                setShareNewTask(false);
+            },
         });
     };
 
     const handleToggleComplete = (task: Task) => {
         updateTaskMutation.mutate({ ...task, completed: !task.completed });
+    };
+
+    const handleToggleShare = (task: Task) => {
+        updateTaskMutation.mutate({ ...task, sharedWithClient: !task.sharedWithClient });
     };
 
     const handleSendToSlack = (task: Task) => {
@@ -66,12 +75,16 @@ const TasksTab: React.FC<TasksTabProps> = ({ contact, teamMembers }) => {
                     value={newTaskTitle}
                     onChange={(e) => setNewTaskTitle(e.target.value)}
                 />
-                <div className="flex gap-2">
+                <div className="flex gap-2 items-center">
                     <Select value={assignedTo} onChange={e => setAssignedTo(e.target.value)} className="flex-1">
                         {teamMembers.map(member => (
                             <option key={member.id} value={member.id}>{member.name}</option>
                         ))}
                     </Select>
+                    <label className="flex items-center gap-2 text-sm text-text-secondary cursor-pointer">
+                        <input type="checkbox" checked={shareNewTask} onChange={(e) => setShareNewTask(e.target.checked)} className="rounded text-primary focus:ring-primary"/>
+                        Share
+                    </label>
                     <Button onClick={handleAddTask} isLoading={addTaskMutation.isPending}>
                         <Icon name="plus" /> Add Task
                     </Button>
@@ -96,12 +109,27 @@ const TasksTab: React.FC<TasksTabProps> = ({ contact, teamMembers }) => {
                                 </p>
                             </div>
                         </div>
-                        {integrations.slack && (
-                             // FIX: Confirmed that the invalid 'size' prop is not present.
-                             <Button variant="secondary" onClick={() => handleSendToSlack(task)} className="!p-2">
-                                <Icon name="zap" className="w-4 h-4" />
-                            </Button>
-                        )}
+                        <div className="flex items-center gap-3">
+                            <label htmlFor={`share-task-${task.id}`} className="flex items-center gap-1 text-xs text-text-secondary cursor-pointer">
+                                <span>Share</span>
+                                <div className="relative">
+                                    <input
+                                        id={`share-task-${task.id}`}
+                                        type="checkbox"
+                                        className="sr-only"
+                                        checked={task.sharedWithClient}
+                                        onChange={() => handleToggleShare(task)}
+                                    />
+                                    <div className="block bg-border-default w-8 h-5 rounded-full"></div>
+                                    <div className={`dot absolute left-1 top-1 bg-white w-3 h-3 rounded-full transition ${task.sharedWithClient ? 'transform translate-x-3 !bg-primary' : ''}`}></div>
+                                </div>
+                            </label>
+                            {integrations.slack && (
+                                <Button variant="secondary" onClick={() => handleSendToSlack(task)} className="!p-2">
+                                    <Icon name="zap" className="w-4 h-4" />
+                                </Button>
+                            )}
+                        </div>
                     </div>
                 ))}
                  {tasks?.length === 0 && <p className="text-center text-text-secondary py-4">No tasks for this contact yet.</p>}

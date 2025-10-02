@@ -1,7 +1,8 @@
 
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../hooks/useAuth';
-import { ChatMessage, Contact, Order } from '../../types';
+import { ChatMessage, Contact, Order, KnowledgeBaseArticle } from '../../types';
 // FIX: The api service is now correctly implemented, and this import resolves the module-not-found error.
 import { api } from '../../services/api';
 import { geminiService } from '../../services/geminiService';
@@ -25,9 +26,10 @@ const AIAssistant: React.FC = () => {
             const contact = await api.getContact(currentUser.contactId, currentUser.organizationId);
             const orders = (await api.getGeneric<Order>('orders', { organizationId: currentUser.organizationId }))
                                .filter((o: Order) => o.contactId === currentUser.contactId);
+            const articles = await api.getGeneric<KnowledgeBaseArticle>('knowledgeBaseArticles', { organizationId: currentUser.organizationId });
             
             if (contact) {
-                 geminiService.startChatSession(contact, orders);
+                 geminiService.startChatSession(contact, orders, articles);
                  setIsInitialized(true);
             }
         }

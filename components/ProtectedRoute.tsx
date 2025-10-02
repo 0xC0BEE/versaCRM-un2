@@ -1,11 +1,13 @@
 
+
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { UserRole } from '../types';
 
 interface ProtectedRouteProps {
-  children: JSX.Element;
+  // FIX: Replaced JSX.Element with React.ReactElement to resolve the 'Cannot find namespace JSX' error.
+  children: React.ReactElement;
   roles: UserRole[];
 }
 
